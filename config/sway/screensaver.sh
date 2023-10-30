@@ -1,0 +1,34 @@
+if [[ "$(pgrep -f 'lock')" != '' ]]
+then
+    exit
+fi
+
+#cmd[0]="cmatrix"
+#cmd[1]="hollywood"
+#cmd[2]="termsaver sysmon"
+#cmd[3]="termsaver wttr"
+#cmd=${cmd[$[$RANDOM % ${#cmd[@]}]]}
+
+cmd="hollywood"
+term="foot"
+
+grim "/tmp/swaylock.png"
+convert "/tmp/swaylock.png" -filter Gaussian -blur 0x8 "/tmp/swaylock-blur.png"
+
+rm "/tmp/swaylock.png"
+
+workspace="$(swaymsg -t get_workspaces -p | grep -oP '(?<=Workspace\s).*?(?=\s\(focused\))')"
+swaymsg workspace "screensaver"
+swaymsg exec $term $cmd 
+
+sleep 0.5
+
+swaymsg fullscreen 
+
+swayidle -w timeout 1 "" resume "pkill -n 'swayidle'"
+
+swaylock -f -i "/tmp/swaylock-blur.png"
+
+pkill -n -f "$term $cmd" &
+swaymsg workspace $workspace &
+rm "/tmp/swaylock-blur.png" &
